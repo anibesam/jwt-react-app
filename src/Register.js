@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom"; // Import useHistory hook
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { register } from "./authService";
 
 const Register = () => {
-  const history = useHistory(); // Initialize useHistory hook
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -40,15 +40,14 @@ const Register = () => {
           photos: [],
         });
         setErrors({});
-        // Redirect to the success page after successful registration
-        history.push("/success");
+        // Navigate to the success page after successful registration
+        navigate("/success");
       })
       .catch((errors) => {
         console.log("Registration errors:", errors);
         setErrors(errors);
       });
   };
-
 
 
 
