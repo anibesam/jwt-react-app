@@ -30,34 +30,45 @@ const Profile = () => {
   // Destructure user data
   const { firstName, lastName, photos } = user;
 
-  return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 mx-auto">
-        <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Welcome, {firstName} {lastName}
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            {email}
-          </p>
-        </div>
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold">Your Photos</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {photos.map((photo) => (
-              <div key={photo.name} className="relative overflow-hidden rounded-lg">
-                <img
-                  className="w-full h-48 object-cover object-center"
-                  src={`data:image/jpeg;base64,${photo.base64Data}`}
-                  alt={photo.name}
-                />
-              </div>
-            ))}
+// Profile.js
+
+// ...
+return (
+  <div className="p-4">
+    {user ? (
+      <>
+        <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
+        <p className="text-gray-600">Email: {user.email}</p>
+
+        {Array.isArray(user.photos) && user.photos.length > 0 ? ( // Check if user.photos is an array
+          <div className="mt-4">
+            <h2 className="text-xl font-semibold">Photos:</h2>
+            <div className="grid gap-4 grid-cols-3 mt-2">
+              {user.photos.map((photo, index) => (
+                <div key={index}>
+                  <img
+                    src={photo}
+                    alt={`Photo ${index + 1}`}
+                    className="w-full h-auto rounded-lg"
+                  />
+                  <p className="text-sm text-gray-600 mt-1">
+                    Photo {index + 1}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
+        ) : (
+          <p className="mt-4">No photos uploaded.</p>
+        )}
+      </>
+    ) : (
+      <p>Loading user data...</p>
+    )}
+  </div>
+);
+// ...
+
 };
 
 export default Profile;
