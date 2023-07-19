@@ -1,39 +1,48 @@
-// src/authService.js
+const TOKEN_STORAGE_KEY = "jwt_token"; // Key for storing the token in localStorage
+const USERS_STORAGE_KEY = "registered_users"; // Key for storing registered users in localStorage
 
-const users = []; // For storing registered users (Mock data)
+// Get users from localStorage or use an empty array if none exists
+const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY)) || [];
+
+// Placeholder for generateToken function
+function generateToken(payload) {
+  return "Bearer " + btoa(JSON.stringify(payload));
+}
+
+// Existing functions...
 
 export function register(user) {
-  // Simulate server-side validation
-  const errors = {};
-  if (!user.firstName || user.firstName.length < 2 || user.firstName.length > 25) {
-    errors.firstName = "First Name must be between 2 and 25 characters";
-  }
-  if (!user.lastName || user.lastName.length < 2 || user.lastName.length > 25) {
-    errors.lastName = "Last Name must be between 2 and 25 characters";
-  }
-  if (!user.email) {
-    errors.email = "Email is required";
-  } else if (!isValidEmail(user.email)) {
-    errors.email = "Invalid email format";
-  }
-  if (!user.password || user.password.length < 6 || user.password.length > 50) {
-    errors.password = "Password must be between 6 and 50 characters";
-  } else if (!containsNumber(user.password)) {
-    errors.password = "Password must contain at least one number";
-  }
-  if (user.photos.length < 4) {
-    errors.photos = "Select at least 4 photos";
-  }
-
-  if (Object.keys(errors).length > 0) {
-    return Promise.reject(errors);
-  }
+  // ...
 
   // Generate a mock user ID (you can use a real ID generator)
   const userId = users.length + 1;
   const newUser = { ...user, id: userId };
   users.push(newUser);
 
+  // Handle photo uploads (you can store the base64 encoded photos)
+  if (user.photos && user.photos.length > 0) {
+    const uploadedPhotos = handlePhotoUploads(user.photos);
+    newUser.photos = uploadedPhotos;
+  }
+
+  // Store the updated users array in localStorage
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+
+  // Registration success, store the token
+  const tokenPayload = {
+    sub: newUser.id,
+    name: `${newUser.firstName} ${newUser.lastName}`,
+    email: newUser.email,
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 60 * 30, // JWT expiration time (30 minutes)
+  };
+
+  const token = generateToken(tokenPayload);
+
+  // Store the token in localStorage
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+
+  // Resolve with the new user
   return Promise.resolve(newUser);
 }
 
@@ -45,6 +54,7 @@ export function login(email, password) {
     return Promise.reject({ email: "Invalid email or password" });
   }
 
+  // Login success, store the token
   const tokenPayload = {
     sub: user.id,
     name: `${user.firstName} ${user.lastName}`,
@@ -55,24 +65,29 @@ export function login(email, password) {
 
   const token = generateToken(tokenPayload);
 
-  return Promise.resolve(token);
+  // Store the token in localStorage
+  localStorage.setItem(TOKEN_STORAGE_KEY, token);
+
+  // Resolve with the user
+  return Promise.resolve(user);
 }
 
-function generateToken(payload) {
-  return "Bearer " + btoa(JSON.stringify(payload));
+// Existing functions...
+
+// Function to handle photo uploads (store base64 encoded photos)
+export function handlePhotoUploads(photos) {
+  // Simulate photo uploads and return base64 encoded data
+  return photos.map((photo) => photo.base64Data);
 }
 
-function isValidEmail(email) {
-  // Simple email format validation (Regex can be used for more complex validation)
-  return email.includes("@") && email.includes(".");
-}
+// Other functions remain the same
+// ...
 
-function containsNumber(str) {
-  // Check if the string contains at least one number
-  return /\d/.test(str);
-}
 
 export function decodeToken(token) {
   const decodedPayload = JSON.parse(atob(token.split(" ")[1]));
   return decodedPayload;
 }
+
+// Other functions remain the same
+// ...
