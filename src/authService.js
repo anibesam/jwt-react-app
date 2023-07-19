@@ -77,7 +77,10 @@ export function login(email, password) {
 // Function to handle photo uploads (store base64 encoded photos)
 export function handlePhotoUploads(photos) {
   // Simulate photo uploads and return base64 encoded data
-  return photos.map((photo) => photo.base64Data);
+  return photos.map((photo) => ({
+    base64Data: URL.createObjectURL(photo), // Convert photo to base64 using URL.createObjectURL
+    name: `photo_${Date.now()}`, // You can generate a unique name for the photo
+  }));
 }
 
 // Other functions remain the same

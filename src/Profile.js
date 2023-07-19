@@ -1,56 +1,61 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { decodeToken } from "./authService";
 
 const Profile = () => {
-  const [user, setUser] = useState(null);
+  // Retrieve the token from localStorage
+  const token = localStorage.getItem("jwt_token");
 
-  useEffect(() => {
-    // Get the token from localStorage
-    const token = localStorage.getItem("jwt_token");
+  // Decode the token to get user information
+  const decodedToken = decodeToken(token);
 
-    // If token is available, decode it to get the user information
-    if (token) {
-      const decodedUser = decodeToken(token);
+  if (!decodedToken) {
+    // If there's no valid token, redirect to login page or handle accordingly
+    // For simplicity, we'll just show a message here.
+    return <div>Token not found. Please log in.</div>;
+  }
 
-      // Set the decoded user data in state
-      setUser(decodedUser);
-    }
-  }, []);
+  // Get user data from the decoded token
+  const { name, email } = decodedToken;
 
-  console.log("User Data:", user);
+  // Retrieve the user data from localStorage or handle accordingly
+  const users = JSON.parse(localStorage.getItem("registered_users")) || [];
+  const user = users.find((u) => u.email === email);
+
+  if (!user) {
+    // If user not found, handle accordingly
+    // For simplicity, we'll just show a message here.
+    return <div>User not found.</div>;
+  }
+
+  // Destructure user data
+  const { firstName, lastName, photos } = user;
 
   return (
-    <div className="p-4">
-      {user ? (
-        <>
-          <h1 className="text-3xl font-bold">Welcome, {user.name}</h1>
-          <p className="text-gray-600">Email: {user.email}</p>
-
-          {user.photos && user.photos.length > 0 ? (
-            <div className="mt-4">
-              <h2 className="text-xl font-semibold">Photos:</h2>
-              <div className="grid gap-4 grid-cols-3 mt-2">
-                {user.photos.map((photo, index) => (
-                  <div key={index}>
-                    <img
-                      src={photo}
-                      alt={`Photo ${index + 1}`}
-                      className="w-full h-auto rounded-lg"
-                    />
-                    <p className="text-sm text-gray-600 mt-1">
-                      Photo {index + 1}
-                    </p>
-                  </div>
-                ))}
+    <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 mx-auto">
+        <div>
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            Welcome, {firstName} {lastName}
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            {email}
+          </p>
+        </div>
+        <div className="space-y-4">
+          <h3 className="text-xl font-bold">Your Photos</h3>
+          <div className="grid grid-cols-2 gap-4">
+            {photos.map((photo) => (
+              <div key={photo.name} className="relative overflow-hidden rounded-lg">
+                <img
+                  className="w-full h-48 object-cover object-center"
+                  src={`data:image/jpeg;base64,${photo.base64Data}`}
+                  alt={photo.name}
+                />
               </div>
-            </div>
-          ) : (
-            <p className="mt-4">No photos uploaded.</p>
-          )}
-        </>
-      ) : (
-        <p>Loading user data...</p>
-      )}
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
