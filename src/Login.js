@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom"; // Import useHistory hook
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { login } from "./authService";
 
 const Login = () => {
-  const history = useHistory(); // Initialize useHistory hook
+  const navigate = useNavigate(); // Initialize useNavigate hook
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
@@ -21,15 +21,15 @@ const Login = () => {
         // Reset the form after successful login
         setFormData({ email: "", password: "" });
         setErrors({});
-        // Redirect to the profile page after successful login
-        history.push("/profile");
+        // Navigate to the profile page after successful login
+        navigate("/profile");
       })
       .catch((errors) => {
         console.log("Login errors:", errors);
         setErrors(errors);
       });
   };
-
+  
   return (
     <>
       {/*
