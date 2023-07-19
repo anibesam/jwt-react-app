@@ -75,16 +75,31 @@ export function login(email, password) {
 // Existing functions...
 
 // Function to handle photo uploads (store base64 encoded photos)
-export function handlePhotoUploads(photos) {
-  // Simulate photo uploads and return base64 encoded data
-  return photos.map((photo) => ({
-    base64Data: URL.createObjectURL(photo), // Convert photo to base64 using URL.createObjectURL
-    name: `photo_${Date.now()}`, // You can generate a unique name for the photo
-  }));
-}
+async function handlePhotoUploads(photos) {
+  const base64Promises = photos.map((photo) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
 
-// Other functions remain the same
-// ...
+      reader.onloadend = () => {
+        resolve(reader.result);
+      };
+
+      reader.onerror = () => {
+        reject(new Error("Failed to read the photo."));
+      };
+
+      reader.readAsDataURL(photo);
+    });
+  });
+
+  try {
+    const base64Urls = await Promise.all(base64Promises);
+    return base64Urls;
+  } catch (error) {
+    console.error("Error while reading photos:", error);
+    return [];
+  }
+}
 
 
 export function decodeToken(token) {
